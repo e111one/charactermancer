@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": false,
+        "noEmitOnError": true,
+        "removeComments": false,
+        "sourceMap": true,
+        "target": "esnext",
+        "outDir": "dist",
+        "types": [
+            "@league-of-foundry-developers/foundry-vtt-types"
+        ],
+        "moduleResolution": "node"
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "allowJs": "true"
+}
