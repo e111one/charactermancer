@@ -1,5 +1,6 @@
 import { Config } from "./config.js"
-import { SettingsForm } from "./settings.js"
+import { FoundryProgressionRepository } from "./progression.js";
+import { ProgressionForm } from "./settings.js"
 
 export default class Bootstrap {
 
@@ -7,7 +8,8 @@ export default class Bootstrap {
 
     static init() {
         Hooks.on("init", () => {
-            SettingsForm.registerSettings(game, Config);
+            const progressionRepository = new FoundryProgressionRepository(game.settings, Config)
+            ProgressionForm.setupForm(game.settings, progressionRepository, Config);
         });
     }
 

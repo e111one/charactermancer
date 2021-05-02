@@ -1,24 +1,25 @@
 import { Config } from "./config.js";
+import { ProgressionRepository } from "./progression.js";
 
 export type Settings = {
 
 }
 
-export class SettingsForm {
+export class ProgressionForm {
 
-    static factory(game: Game, config: Config): ConstructorOf<FormApplication<FormApplication.Options, FormApplication.Data<Settings>, Settings>> {
+    static factory(settings: ClientSettings, progressionRepository: ProgressionRepository, config: Config): ConstructorOf<FormApplication<FormApplication.Options, FormApplication.Data<Settings>, Settings>> {
         return class Form extends FormApplication<FormApplication.Options, FormApplication.Data<Settings>, Settings> {
 
             constructor(settings?: Settings, options?: Partial<FormApplication.Options>) {
                 super(settings, options)
-                console.log(game)
                 console.log(config)
                 console.log(settings)
                 console.log(options)
             }
 
             protected async _updateObject(event: Event, formData?: object) {
-                throw new Error("Method not implemented.");
+                //@TODO convert form data into ClassProgression list and save it in repository
+                progressionRepository.writeProgression([]);
             }
 
             protected _onDrop(event: DragEvent) {
@@ -47,12 +48,12 @@ export class SettingsForm {
         }
     }
 
-    static registerSettings(game: Game, config: Config) {
-        game.settings.registerMenu(config.name, config.menuName, {
+    static setupForm(settings: ClientSettings, progressionRepository: ProgressionRepository, config: Config) {
+        settings.registerMenu(config.name, config.menuName, {
             name: "Charactermancer Configuration",
             label: "Magic lies ahead",
             icon: "fas fa-bars",
-            type: SettingsForm.factory(game, config),
+            type: ProgressionForm.factory(settings, progressionRepository, config),
             restricted: true // Restrict this submenu to gamemaster only?
         })
     }
