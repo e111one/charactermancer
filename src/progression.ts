@@ -1,75 +1,39 @@
-type RaceProgression = {
-    inits: {
-        features: [Races],
-        /*@TODO: resistances and proficiencies based on race features*/
-    }
-}
-
 type ClassProgression = {
-    class: Item | string,
-    hitDice: HitDice
-    inits: {
-        hp: HpFormula
-        features: [Feature],
-        proficiencies: [Proficience],
-        /*equipment: [Equipment],*/
-        spellcasting: [Spellcasting],
-        classStarterBackpack: [ClassStarterBackpack],
+    level: [ClassLevel],
+    class: [Class],
+    box: {
+        boxType: [BoxType]//string, //regular | optional | prerequisite
+        boxContains: [BoxConstructRegular] | [BoxConstructOptional] | [BoxConstructPrerequisite]
     },
-    milestones: [Milestone]
 }
 
-type HitDice = {
-    n: number
-}
+type BoxConstructRegular = {
+    boxKey: [BoxKey],
+    innerItems: Item | string
+} | null
+type BoxConstructOptional = {
+    boxKey: [BoxKey],
+    innerItems: Item | string //not sure if i must respect the logic here
+} | null
+type BoxConstructPrerequisite = {
+    boxKey: [BoxKey],
+    valueRequired: Item | string | null
+    innerItems: Item | string
+} | null
 
-type HpFormula = {
-    init: number,
-    modifier: string
-}
+type ClassLevel = number
+type Class = Item | string
+type BoxType = regular | optional | prerequisite
+type regular = string
+type optional = string
+type prerequisite = string
+type BoxKey = Item | string
 
-type Milestone = {
-    level: number,
-    proficiencyBonus: number,
-    /*features: [Feature]*/
-}
-
-type Spellcasting = {
-    spellcastingAbility: boolean,
-    spellcastingType: Item | string,
-    hasSpells: string,
-    /*hasSpellslots: number[]*/
-}
-
-type ClassStarterBackpack = {
-    starterGear: [StarterGear],
-    starterCoins: [StarterCoins]
-}
-
-type StarterGear = {
-    Armor: [Armor],
-    Weapon: [Weapon],
-    /*@TODO: background items?*/
-}
-
-type StarterCoins = {
-    coins: number | null
-}
-
-type Races = Item | string
-type Feature = Item | string
-type Armor = string
-type Weapon = string
-type Tool = string
-type SavingThrow = string
-type Skill = string
-type Other = Item | string
-type Proficience = Armor | Weapon | Tool | SavingThrow | Skill | Other
-
-/*type Equipment = Item*/
-
-/*class Prog {
-
-    class: Item
-
-}*/
+/*@TODO: playersheet stats
+*type Race = Item | string
+*type SavingThrow = string
+*type Skill = string
+*type Resistance = Item | string
+*type Other = Item | string
+*type Proficience = Armor | Weapon | Tool | SavingThrow | Skill | Other
+**/
