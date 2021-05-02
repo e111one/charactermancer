@@ -1,44 +1,39 @@
-type Progression = {
-    class: Item | string,
-    hitDice: HitDice
-    inits: {
-        hp: HpFormula
-        features: [Feature],
-        proficiencies: [Proficience],
-        equipment: [Equipment]
+type ClassProgression = {
+    level: [ClassLevel],
+    class: [Class],
+    box: {
+        boxType: [BoxType]//string, //regular | optional | prerequisite
+        boxContains: [BoxConstructRegular] | [BoxConstructOptional] | [BoxConstructPrerequisite]
     },
-    milestones: [Milestone]
 }
 
-type HitDice = {
-    n: number
-}
+type BoxConstructRegular = {
+    boxKey: [BoxKey],
+    innerItems: Item | string
+} | null
+type BoxConstructOptional = {
+    boxKey: [BoxKey],
+    innerItems: Item | string //not sure if i must respect the logic here
+} | null
+type BoxConstructPrerequisite = {
+    boxKey: [BoxKey],
+    valueRequired: Item | string | null
+    innerItems: Item | string
+} | null
 
-type Armor = string
-type Weapon = string
-type Tool = string
-type SavingThrow = string
-type Skill = string
-type Other = Item | string
-type Proficience = Armor | Weapon | Tool | SavingThrow | Skill | Other
+type ClassLevel = number
+type Class = Item | string
+type BoxType = regular | optional | prerequisite
+type regular = string
+type optional = string
+type prerequisite = string
+type BoxKey = Item | string
 
-type HpFormula = {
-    init: number,
-    modifier: string
-}
-
-type Feature = Item | string
-
-type Equipment = Item
-
-type Milestone = {
-    level: number,
-    proficiencyBonus: number,
-    features: [Feature]
-}
-
-class Prog {
-
-    class: Item
-
-}
+/*@TODO: playersheet stats
+*type Race = Item | string
+*type SavingThrow = string
+*type Skill = string
+*type Resistance = Item | string
+*type Other = Item | string
+*type Proficience = Armor | Weapon | Tool | SavingThrow | Skill | Other
+**/
