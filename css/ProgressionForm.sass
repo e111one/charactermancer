@@ -1,0 +1,70 @@
+%basicPageStyles
+    color: black
+    background-image: url("/ui/parchment.jpg")
+    background-repeat: repeat
+    border: 1px solid black
+.boxProgression
+    @extend %basicPageStyles
+    min-width: 200px
+    min-height: 300px
+    position: relative
+    display: flex
+    flex-direction: column
+    justify-content: flex-start
+    .btn
+        align-self: flex-start
+        height: 30px
+        width: 30px
+    .btnInfo
+        position: absolute
+        margin-top: -1px
+        margin-left: -1px
+        background-color: #f5f0e0
+    .btn-small
+        width: 90px 
+    .btn-medium
+        width: 200px
+    .btn-large
+        height: 50px
+        width: 100%
+    .box
+        min-height: 200px
+        min-width: 200px
+        max-height: 300px
+        max-width: 500px
+        margin: 5px
+        border: 1px solid red
+    .smallBox
+        min-width: 100px
+        min-height: 100%
+        border: 1px solid green
+    .boxNewLevel
+        padding-top: 5px
+        border: 1px solid cyan
+    .levelValue
+        text-align: center
+        padding: 5px
+        min-width: 30px
+        height: 30px
+    .boxNewLevelControl
+        display: flex
+        justify-content: flex-start
+    .boxNewLevelContainer
+        display: flex
+        justify-content: center
+        flex-wrap: wrap
+        padding: 5px
+    .optionContainer
+        display: flex
+    .PrerequisiteContainer
+        display: flex
+    .boxPrerequisite
+        width: 100%
+    .Award
+        min-width: 100px
+        min-height: 70%
+        border: 1px solid magenta
+    .Prerequisite
+        @extend .Award
+        min-height: 30%
+        background-color: #fff
