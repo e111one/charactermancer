@@ -5,30 +5,24 @@ export type ClassProgression = {
     levels: Array<ClassLevel>
 }
 
-type Class = Item | string
+type ItemReference = Item | string
 
-type FeatureRegular = {
-    _type: "regular",
-    items: Array<Item | string>
+type Class = ItemReference
+
+type Items = {
+    items: Array<ItemReference>
 }
 
-type FeatureOptional = {
-    _type: "optional",
-    items: Array<Item | string>
-}
-
-type FeaturePrerequisite = {
-    _type: "prerequisite",
-    prerequisites: Array<Item | string>
-    items: Array<Item | string>
+type Prerequisites = {
+    prerequisites: Array<ItemReference>
 }
 
 type ClassLevel = {
     level: number,
     features: {
-        regular?: FeatureRegular,
-        optional?: FeatureOptional,
-        prerequisites?: FeaturePrerequisite
+        regular: Items,
+        optional: Items,
+        prerequisites: Items & Prerequisites
     }
 }
 
