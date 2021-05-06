@@ -1,15 +1,20 @@
 import { Config } from "./config.js"
 import { FoundryProgressionRepository } from "./progression/ProgressionRepository.js";
 import { ProgressionForm } from "./progression/ProgressionForm.js"
+import { FoundryCompendiumRepository } from "./progression/CompendiumRepository.js";
 
 export default class Bootstrap {
 
     declare game: Game
+    declare CONFIG: unknown
 
     static init() {
         Hooks.on("init", () => {
-            const progressionRepository = new FoundryProgressionRepository(game.settings, Config)
-            ProgressionForm.setupForm(game.settings, progressionRepository, Config);
+            Hooks.on("renderCompendiumDirectory", () => {
+                const progressionRepository = new FoundryProgressionRepository(game.settings, Config)
+                const compendiumRepository = new FoundryCompendiumRepository(game.packs)
+                ProgressionForm.setupForm(game.settings, progressionRepository, compendiumRepository, Config);
+            });
         });
     }
 
