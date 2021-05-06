@@ -1,8 +1,13 @@
 <form autocomplete="off" onsubmit="event.preventDefault();" class="charactermancer-form">
-    <div>
-        <ul>
-            <li class="drag">Foo</li>
-            <li class="drag">Bar</li>
-        </ul>
-    </div>
+    <nav class="tabs" data-group="primary-tabs">
+        {{#each object.progressions}}
+        <a class="item" data-tab="{{this.class}}">{{this.class}}</a>
+        {{/each}}
+    </nav>
+
+    <section class="content">
+        {{#each object.progressions}}
+        <div class="tab" data-tab="{{this.class}}" data-group="primary-tabs">{{this.class}} content</div>
+        {{/each}}
+    </section>
 </form>

@@ -1,6 +1,6 @@
 import { Config } from "./config.js"
-import { FoundryProgressionRepository } from "./progression.js";
-import { ProgressionForm } from "./settings.js"
+import { FoundryProgressionRepository } from "./progression/ProgressionRepository.js";
+import { ProgressionForm } from "./progression/ProgressionForm.js"
 
 export default class Bootstrap {
 
