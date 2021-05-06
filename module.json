@@ -13,5 +13,8 @@
     "download": "https://github.com/e111one/charactermancer/releases/download/0.1.0/module.zip",
     "esmodules": [
         "./charactermancer.js"
+    ],
+    "styles": [
+        "./css/style.css"
     ]
 }

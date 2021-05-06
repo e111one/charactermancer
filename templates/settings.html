@@ -1,13 +1,19 @@
 <form autocomplete="off" onsubmit="event.preventDefault();" class="charactermancer-form">
     <nav class="tabs" data-group="primary-tabs">
         {{#each object.progressions}}
-        <a class="item" data-tab="{{this.class}}">{{this.class}}</a>
-        {{/each}}
+        <a class="item" data-tab="{{this.class.item._id}}">{{this.class.item.name}}</a> {{/each}}
+        <a class="item" data-tab="new-class"><i class="fas fa-plus"></i></a>
     </nav>
 
     <section class="content">
         {{#each object.progressions}}
-        <div class="tab" data-tab="{{this.class}}" data-group="primary-tabs">{{this.class}} content</div>
+        <div class="tab" data-tab="{{this.class.item._id}}" data-group="primary-tabs">
+            {{this.class.item.name}} content
+        </div>
         {{/each}}
+        <div class="tab new-class" data-tab="new-class" data-group="primary-tabs">
+            <div class="drop-box class-drop">
+                Drag & Drop class or race item here
+            </div>
     </section>
 </form>

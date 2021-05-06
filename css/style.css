@@ -1,3 +1,33 @@
-.charactermancer-form .drop {
-    height: 100px;
+.charactermancer-form .tabs .item {
+    background-color: #684e09;
+    border: none;
+    color: white;
+    padding: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    border-radius: 4px;
+    flex: 0;
+}
+
+.charactermancer-form .tabs .item:hover {
+    text-shadow: none;
+    background-color: #463300;
+}
+
+.charactermancer-form .tabs .item.active {
+    text-shadow: none;
+    background-color: #92721b;
+}
+
+.charactermancer-form .drop-box {
+    width: 100%;
+    padding: 30px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 4px;
+    border-radius: 8px;
+    border: 1px #92721b dashed;
+    background-color: #e0cc9483;
 }
