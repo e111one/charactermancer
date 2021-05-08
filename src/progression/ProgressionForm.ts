@@ -6,7 +6,9 @@ import { CompendiumRepository } from "./CompendiumRepository.js";
 export type ProgressionSettings = {
     progressions: Array<ClassProgression>
 }
-
+//@TODO: init varClassId
+let lastClassId: string;
+let i:number = 0;
 export class ProgressionForm {
 
     static factory(settings: ClientSettings, progressionRepository: ProgressionRepository, compendiumRepository: CompendiumRepository, config: Config): ConstructorOf<FormApplication<FormApplication.Options, FormApplication.Data<ProgressionSettings>, ProgressionSettings>> {
@@ -22,17 +24,33 @@ export class ProgressionForm {
             protected async _updateObject(event: Event, formData?: object) {
                 progressionRepository.writeProgression([] /*this.progressions*/);
             }
-
             /**
              * Data that is fed to Handlebars template
              * @param options 
              * @returns progressions list resolved into actual items
              */
             getData(options?: Application.RenderOptions): FormApplication.Data<ProgressionSettings> | Promise<FormApplication.Data<ProgressionSettings>> {
+                //@TODO: remove clog
+                /*super.render = (lastClassId) => {
+                    //this._tabs[0].activate(`${lastClassId}`)
+                    console.log('super.render > this._tabs = ')
+                    console.log(this._tabs)
+                }*/
+                console.log('this (getData) = ')
+                console.log(this)
+                /*@TODO: this.options.tabs[0].initial = `${lastClassId}`*/
                 return this.resolveProgression(this.progressions).then(resolved => {
+                    console.log('this (resolveProg) = ')
+                    console.log(this)
+                    /*++i;
+                    console.log('i = '+ i)
+                    if(i>1){
+                        this._tabs[0].activate(`${lastClassId}`)
+                    }*/
                     return {
                         object: duplicate({
                             progressions: resolved
+
                         }),
                         options: Form.defaultOptions,
                         title: Form.defaultOptions.title
@@ -53,6 +71,15 @@ export class ProgressionForm {
                 if (item && item.id && item.type === "Item") {
                     if (item.pack) {
                         this.addFromCompendium(item, dropTarget).then(_ => this.render())
+                        if (item.pack == "dnd5e.classes") {
+                            lastClassId = item.id
+                            //@TODO: kill clog + fix if
+                            this._tabs[0].active = `${lastClassId}`
+                            //this._tabs[0].activate(`${lastClassId}`)
+                            console.log('this(drop) = ')
+                            console.log(this)
+                            console.log('item.id = ' + item.id);
+                        }
                     } else {
                         //@TODO it's from the items directory, not compendium
                     }
