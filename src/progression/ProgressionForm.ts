@@ -6,7 +6,6 @@ import { CompendiumRepository } from "./CompendiumRepository.js";
 export type ProgressionSettings = {
     progressions: Array<ClassProgression>
 }
-
 export class ProgressionForm {
 
     static factory(settings: ClientSettings, progressionRepository: ProgressionRepository, compendiumRepository: CompendiumRepository, config: Config): ConstructorOf<FormApplication<FormApplication.Options, FormApplication.Data<ProgressionSettings>, ProgressionSettings>> {
@@ -22,7 +21,6 @@ export class ProgressionForm {
             protected async _updateObject(event: Event, formData?: object) {
                 progressionRepository.writeProgression([] /*this.progressions*/);
             }
-
             /**
              * Data that is fed to Handlebars template
              * @param options 
@@ -33,6 +31,7 @@ export class ProgressionForm {
                     return {
                         object: duplicate({
                             progressions: resolved
+
                         }),
                         options: Form.defaultOptions,
                         title: Form.defaultOptions.title
@@ -96,6 +95,7 @@ export class ProgressionForm {
              * @param pack optional package id if the item was from compendium
              */
             private addClass(classItem: Item, pack?: string): void {
+                this._tabs[0].active = classItem.data._id
                 this.progressions.push({
                     class: {
                         item: classItem,
