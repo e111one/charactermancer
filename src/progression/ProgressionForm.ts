@@ -1,6 +1,6 @@
 import { Config } from "../config.js";
 import { ProgressionRepository } from "./ProgressionRepository.js";
-import { ClassProgression } from "./ClassProgression.js";
+import { ClassProgression, ItemReference } from "./ClassProgression.js";
 import { CompendiumRepository } from "./CompendiumRepository.js";
 
 export type ProgressionSettings = {
@@ -12,6 +12,7 @@ export class ProgressionForm {
         return class Form extends FormApplication<FormApplication.Options, FormApplication.Data<ProgressionSettings>, ProgressionSettings> {
 
             private progressions: ClassProgression[];
+            private _currentTab: string
 
             constructor(progression?: ProgressionSettings, options?: Partial<FormApplication.Options>) {
                 super(progression, options)
@@ -19,7 +20,7 @@ export class ProgressionForm {
             }
 
             protected async _updateObject(event: Event, formData?: object) {
-                progressionRepository.writeProgression([] /*this.progressions*/);
+                progressionRepository.writeProgression([] /*this.referenceProgressions(this.progressions)*/);
             }
             /**
              * Data that is fed to Handlebars template
@@ -27,15 +28,48 @@ export class ProgressionForm {
              * @returns progressions list resolved into actual items
              */
             getData(options?: Application.RenderOptions): FormApplication.Data<ProgressionSettings> | Promise<FormApplication.Data<ProgressionSettings>> {
-                return this.resolveProgression(this.progressions).then(resolved => {
+                return this.resolveProgression(this.progressions).then(_ => {
                     return {
                         object: duplicate({
-                            progressions: resolved
-
+                            progressions: this.progressions
                         }),
                         options: Form.defaultOptions,
                         title: Form.defaultOptions.title
                     }
+                });
+            }
+
+            activateListeners(html: JQuery): void {
+                super.activateListeners(html)
+                this.bindAddLevelButtons(html)
+                this.bindItemSheetClicks(html)
+            }
+
+            private bindAddLevelButtons(html: JQuery): void {
+                html.find(".new-lvl").map((index, element) => {
+                    element.addEventListener("click", (event) => {
+                        event.preventDefault()
+                        let classId = element.getAttribute("data-class-id")
+                        this.addLevel(classId)
+                        this.render()
+                    })
+                });
+            }
+
+            private bindItemSheetClicks(html: JQuery): void {
+                html.find(".feature-link").map((_, element) => {
+                    element.addEventListener("click", (event) => {
+                        let classId = element.getAttribute("data-class-id")
+                        let levelId = element.getAttribute("data-level-id")
+                        let itemId = element.getAttribute("data-item-id")
+
+                        let ref = this.progressions.find(prog => prog.class.id === classId)?.findFeature(levelId, itemId)
+
+                        switch (ref?._type) {
+                            case "item":
+                                ref.item.sheet.render(true)
+                        }
+                    });
                 });
             }
 
@@ -48,6 +82,12 @@ export class ProgressionForm {
                 const target = event.target as HTMLElement;
 
                 const dropTarget = this.getDropTarget(target)
+
+                if (dropTarget == null) {
+                    console.log("Something went horribly wrong with the drop target")
+                    //@TODO notify error
+                    return
+                }
 
                 if (item && item.id && item.type === "Item") {
                     if (item.pack) {
@@ -67,12 +107,37 @@ export class ProgressionForm {
              * @param target HTMLElement that is a drop victim
              * @returns 
              */
-            private getDropTarget(target: HTMLElement): DropTarget {
-                if (target.classList.contains("class-drop")) {
-                    return "class"
+            private getDropTarget(target: HTMLElement): DropTarget | null {
+                if (target.classList.contains("drop-box")) {
+                    if (target.classList.contains("class-drop")) {
+                        return {
+                            _type: "class"
+                        }
+                    } else if (target.classList.contains("features") && target.classList.contains("granted")) {
+                        return {
+                            _type: "level",
+                            featureType: "granted",
+                            levelId: target.getAttribute("data-level-id"),
+                            classId: target.getAttribute("data-class-id")
+                        }
+                    } else if (target.classList.contains("features") && target.classList.contains("options")) {
+                        return {
+                            _type: "level",
+                            featureType: "option",
+                            levelId: target.getAttribute("data-level-id"),
+                            classId: target.getAttribute("data-class-id")
+                        }
+                    } else if (target.classList.contains("features") && target.classList.contains("prerequisites")) {
+                        return {
+                            _type: "level",
+                            featureType: "prerequisite",
+                            levelId: target.getAttribute("data-level-id"),
+                            classId: target.getAttribute("data-class-id")
+                        }
+                    }
                 } else {
-                    //@TODO read target properties to figure out what level it is (+ parent dnd class)?
-                    return "feature"
+                    //seems like we are inside of a child element. should climb up the DOM tree
+                    return this.getDropTarget(target.parentElement)
                 }
             }
 
@@ -84,59 +149,55 @@ export class ProgressionForm {
             private async addFromCompendium(item: DropItem, dropTarget: DropTarget): Promise<void> {
                 let compendiumItem = await compendiumRepository.findItemByPackAndId(item.pack, item.id)
 
-                if (dropTarget === "class" && compendiumItem.data.type === "class") {
+                if (dropTarget._type === "class" && compendiumItem.data.type === "class") {
                     this.addClass(compendiumItem, item.pack)
+                } else if (dropTarget._type === "level") {
+                    this.addFeature(compendiumItem, dropTarget.featureType, dropTarget.classId, dropTarget.levelId, item.pack)
                 }
             }
 
             /**
              * Add new class to the internal state of the form
              * @param classItem resolved class item
-             * @param pack optional package id if the item was from compendium
+             * @param pack options package id if the item was from compendium
              */
             private addClass(classItem: Item, pack?: string): void {
                 this._tabs[0].active = classItem.data._id
-                this.progressions.push({
-                    class: {
-                        item: classItem,
-                        pack: pack
-                    },
-                    levels: []
+                this.progressions.push(new ClassProgression({
+                    _type: "item",
+                    id: classItem._id,
+                    item: classItem
+                }))
+            }
+
+            private addFeature(featureItem: Item, featureType: FeatureType, classId: string, levelId: string, pack?: string): void {
+                const cls = this.progressions.find(prog => prog.class.id === classId)
+                cls?.addFeature(featureType, levelId, {
+                    _type: "item",
+                    id: featureItem._id,
+                    item: featureItem
                 })
+            }
+
+            private addLevel(classId: string): void {
+                const cls = this.progressions.find(prog => prog.class.id === classId)
+                cls?.addLevel()
             }
 
             /**
              * Map over progressions and resolve identifiers to the actual items from compendium or items list
              * @param progs list of progressions
              */
-            private async resolveProgression(progs: ClassProgression[]): Promise<ClassProgression[]> {
-                return Promise.all(
-                    progs.map(async p => {
-                        if (typeof p.class.item === "string") {
-                            if (p.class.pack) {
-                                const item = await compendiumRepository.findItemByPackAndId(p.class.pack, p.class.item);
-                                p.class.item = item;
-                                return p
-                            } else {
-                                return p
-                            }
-                        } else {
-                            return p
-                        }
-                    }))
+            private async resolveProgression(progs: ClassProgression[]): Promise<void> {
+                await Promise.all(this.progressions.map(p => p.derefItems(compendiumRepository)))
             }
 
             /**
              * Reverse operation to `resolveProgression`
              * @param progs list of progressions
              */
-            private referenceProgression(progs: ClassProgression[]): ClassProgression[] {
-                return progs.map(p => {
-                    if (p.class.item instanceof Item) {
-                        p.class.item = p.class.item._id
-                    }
-                    return p;
-                })
+            private referenceProgression(progs: ClassProgression[]): void {
+                this.progressions.map(p => p.refItems())
             }
 
             static get defaultOptions(): FormApplication.Options {
@@ -156,7 +217,7 @@ export class ProgressionForm {
                         dragDrop: [{ dropSelector: ".drop-box" }],
                         tabs: [{
                             navSelector: ".tabs",
-                            contentSelector: "form"
+                            contentSelector: "form",
                         }]
                     }
                 }
@@ -165,6 +226,7 @@ export class ProgressionForm {
     }
 
     static setupForm(settings: ClientSettings, progressionRepository: ProgressionRepository, compendiumRepository: CompendiumRepository, config: Config) {
+        loadTemplates(['modules/charactermancer/templates/features.html']);
         settings.registerMenu(config.name, config.menuName, {
             name: "Charactermancer Configuration",
             label: "Magic lies ahead",
@@ -182,4 +244,21 @@ type DropItem = {
     pack?: string
 }
 
-type DropTarget = "class" | "feature" //@TODO proper targets
+type LevelTarget = {
+    _type: "level",
+    featureType: FeatureType,
+    levelId: string,
+    classId: string
+}
+
+type ClassTarget = {
+    _type: "class"
+}
+
+type DropTarget = ClassTarget | LevelTarget //@TODO proper targets
+
+type RegularFeature = "granted"
+type OptionalFeature = "option"
+type PrerequisiteFeature = "prerequisite"
+
+type FeatureType = RegularFeature | OptionalFeature | PrerequisiteFeature
