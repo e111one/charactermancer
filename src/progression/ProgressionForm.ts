@@ -52,10 +52,6 @@ export class ProgressionForm {
                 if (item && item.id && item.type === "Item") {
                     if (item.pack) {
                         this.addFromCompendium(item, dropTarget).then(_ => this.render())
-                        if (item.pack == "dnd5e.classes") {
-                            let lastClassId:string = item.id
-                            this._tabs[0].active = `${lastClassId}`
-                        }
                     } else {
                         //@TODO it's from the items directory, not compendium
                     }
@@ -99,6 +95,7 @@ export class ProgressionForm {
              * @param pack optional package id if the item was from compendium
              */
             private addClass(classItem: Item, pack?: string): void {
+                this._tabs[0].active = classItem.data._id
                 this.progressions.push({
                     class: {
                         item: classItem,
