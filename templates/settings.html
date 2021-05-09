@@ -1,40 +1,58 @@
-<form autocomplete="off" onsubmit="event.preventDefault();" class="charactermancer-form">
-    <nav class="tabs" data-group="primary-tabs">
-        {{#each object.progressions}}
-            <a class="item" data-tab="{{this.cls.item._id}}">{{this.cls.item.name}}</a>
-        {{/each}}
-        <a class="item" data-tab="new-class"><i class="fas fa-plus"></i></a>
-    </nav>
+<form
+  autocomplete="off"
+  onsubmit="event.preventDefault();"
+  class="charactermancer-form"
+>
+  <nav class="tabs" data-group="primary-tabs">
+    {{#each object.progressions}}
+    <a class="item" data-tab="{{this.cls.item._id}}">{{this.cls.item.name}}</a>
+    {{/each}}
+    <a class="item" data-tab="new-class"><i class="fas fa-plus"></i></a>
+  </nav>
 
-    <section class="content">
-        {{#each object.progressions as | prog |}}
-            <div class="tab" data-tab="{{prog.cls.item._id}}" data-group="primary-tabs">
-                {{#each prog.levels as | level |}}
-                    <h2 class="level-number">Level {{level.level}}</h2>
-                    <div class="features granted drop-box" data-class-id="{{prog.cls.item._id}}"
-                        data-level-id="{{level.id}}">
-                        <h3 class="features-header">Granted</h3>
-                        {{> "modules/charactermancer/templates/features.html" classId=prog.cls.id levelId=level.id features=level.features.granted.items}}
-                    </div>
-                    <div class="features options drop-box" data-class-id="{{prog.cls.item._id}}"
-                        data-level-id="{{level.id}}">
-                        <h3 class="features-header">Options</h3>
-                        {{> "modules/charactermancer/templates/features.html" classId=prog.cls.id levelId=level.id features=level.features.options.items}}
-                    </div>
-                    <div class="features prerequisites drop-box"
-                        data-class-id="{{prog.cls.item._id}}" data-level-id="{{level.id}}">
-                        <h3 class="features-header">Prerequisites</h3>
-                        {{> "modules/charactermancer/templates/features.html" classId=prog.cls.id levelId=level.id features=level.features.prerequisites.items}}
-                    </div>
-                {{/each}}
-                <button class="new-lvl" data-class-id="{{this.cls.item._id}}">+ Add new
-                    level</button>
-            </div>
-        {{/each}}
-        <div class="tab new-class" data-tab="new-class" data-group="primary-tabs">
-            <div class="drop-box class-drop">
-                Drag & Drop class or race item here
-            </div>
-        </div>
-    </section>
+  <section class="content">
+    {{#each object.progressions as | prog |}}
+    <div class="tab" data-tab="{{prog.cls.item._id}}" data-group="primary-tabs">
+      {{#each prog.levels as | level |}}
+      <h2 class="level-number">Level {{level.level}}</h2>
+      <div
+        class="features granted drop-box"
+        data-class-id="{{prog.cls.item._id}}"
+        data-level-id="{{level.id}}"
+      >
+        <h3 class="features-header">Granted</h3>
+        {{> "modules/charactermancer/templates/features.html"
+        classId=prog.cls.id levelId=level.id
+        features=level.features.granted.items}}
+      </div>
+      <div
+        class="features options drop-box"
+        data-class-id="{{prog.cls.item._id}}"
+        data-level-id="{{level.id}}"
+      >
+        <h3 class="features-header">Options</h3>
+        {{> "modules/charactermancer/templates/features.html"
+        classId=prog.cls.id levelId=level.id
+        features=level.features.options.items}}
+      </div>
+      <div
+        class="features prerequisites drop-box"
+        data-class-id="{{prog.cls.item._id}}"
+        data-level-id="{{level.id}}"
+      >
+        <h3 class="features-header">Prerequisites</h3>
+        {{> "modules/charactermancer/templates/features.html"
+        classId=prog.cls.id levelId=level.id
+        features=level.features.prerequisites.items}}
+      </div>
+      {{/each}}
+      <button class="new-lvl" data-class-id="{{this.cls.item._id}}">
+        + Add new level
+      </button>
+    </div>
+    {{/each}}
+    <div class="tab new-class" data-tab="new-class" data-group="primary-tabs">
+      <div class="drop-box class-drop">Drag & Drop class or race item here</div>
+    </div>
+  </section>
 </form>

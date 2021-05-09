@@ -1,16 +1,20 @@
 {{#if features.length}}
-    <div class="features-list">
-        {{#each features as |feature|}}
-            <div class="feature">
-                <a class="feature-link" data-class-id="{{../classId}}"
-                    data-item-id="{{feature.item._id}}" data-level-id="{{../levelId}}">
-                    <img class="feature-image" src="{{feature.item.img}}" />
-                    <span class="feature-name">{{feature.item.name}}</span>
-                </a>
-                <a class="feature-delete"><i class="fas fa-trash"></i></a>
-            </div>
-        {{/each}}
-    </div>
+<div class="features-list">
+  {{#each features as |feature|}}
+  <div class="feature">
+    <a
+      class="feature-link"
+      data-class-id="{{../classId}}"
+      data-item-id="{{feature.item._id}}"
+      data-level-id="{{../levelId}}"
+    >
+      <img class="feature-image" src="{{feature.item.img}}" />
+      <span class="feature-name">{{feature.item.name}}</span>
+    </a>
+    <a class="feature-delete"><i class="fas fa-trash"></i></a>
+  </div>
+  {{/each}}
+</div>
 {{else}}
-    <div class="drag-drop-tip">Drag & Drop items here</div>
+<div class="drag-drop-tip">Drag & Drop items here</div>
 {{/if}}

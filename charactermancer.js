@@ -1,3 +1,3 @@
-import Bootstrap from './dist/bootstrap.js';
+import Bootstrap from "./dist/bootstrap.js";
 
 Bootstrap.init();

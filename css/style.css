@@ -1,100 +1,99 @@
 .charactermancer-form .tabs .item {
-    background-color: #684e09;
-    border: none;
-    color: white;
-    padding: 5px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    margin: 4px 2px;
-    border-radius: 4px;
-    flex: 0;
+  background-color: #684e09;
+  border: none;
+  color: white;
+  padding: 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  border-radius: 4px;
+  flex: 0;
 }
 
 .charactermancer-form .tabs .item:hover {
-    text-shadow: none;
-    background-color: #463300;
+  text-shadow: none;
+  background-color: #463300;
 }
 
 .charactermancer-form .tabs .item.active {
-    text-shadow: none;
-    background-color: #92721b;
+  text-shadow: none;
+  background-color: #92721b;
 }
 
 .charactermancer-form .class-drop {
-    width: 100%;
-    padding: 30px;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 4px;
-    border-radius: 8px;
-    border: 1px #92721b dashed;
-    background-color: #e0cc9483;
+  width: 100%;
+  padding: 30px;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 4px;
+  border-radius: 8px;
+  border: 1px #92721b dashed;
+  background-color: #e0cc9483;
 }
 
 .charactermancer-form .level {
-    display: flex;
-    flex-wrap: wrap;
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .charactermancer-form .level .level-number {
-    font-weight: 700;
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
+  font-weight: 700;
+  font-family: "Modesto Condensed", "Palatino Linotype", serif;
 }
 
 .charactermancer-form .features-target {
-    box-shadow: 0px 0px 10px 1px rgb(0,0,0,0.5);
+  box-shadow: 0px 0px 10px 1px rgb(0, 0, 0, 0.5);
 }
 
 .charactermancer-form .features-header {
-    font-family: "Modesto Condensed", "Palatino Linotype", serif;
-    font-weight: 700;
-    color: #7a7971;
-    border: 2px groove #eeede0;
-    background-color: rgb(0, 0, 0, 0.05);
-    margin: 0;
-    padding: 5px;
+  font-family: "Modesto Condensed", "Palatino Linotype", serif;
+  font-weight: 700;
+  color: #7a7971;
+  border: 2px groove #eeede0;
+  background-color: rgb(0, 0, 0, 0.05);
+  margin: 0;
+  padding: 5px;
 }
 
 .charactermancer-form .feature {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 2px;
-    border-bottom: 1px solid rgb(0,0,0,0.05);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 2px;
+  border-bottom: 1px solid rgb(0, 0, 0, 0.05);
 }
 
-
 .charactermancer-form .feature > * {
-    flex: 1;
+  flex: 1;
 }
 
 .charactermancer-form .feature .feature-link {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }
 
 .charactermancer-form .feature .feature-link > * {
-    flex: 1;
+  flex: 1;
 }
 
 .charactermancer-form .feature .feature-image {
-    flex: 0 0 30px;
-    margin-right: 5px;
-    height: 30px;
+  flex: 0 0 30px;
+  margin-right: 5px;
+  height: 30px;
 }
 
 .charactermancer-form .feature .feature-delete {
-    flex: none;
-    margin-left: auto;
-    color: #7a7971;
+  flex: none;
+  margin-left: auto;
+  color: #7a7971;
 }
 
 .charactermancer-form .features .drag-drop-tip {
-    padding: 5px;
-    margin: 5px 1px;
-    text-align: center;
-    color: #51504b;
-    background-color: rgb(0,0,0, 0.03);
-    border: 1px dashed #7a7971;
+  padding: 5px;
+  margin: 5px 1px;
+  text-align: center;
+  color: #51504b;
+  background-color: rgb(0, 0, 0, 0.03);
+  border: 1px dashed #7a7971;
 }
