@@ -30,11 +30,17 @@ export interface ProgressionRepository {
      * Add new feature to the class.level.featureType
      * @param classId id of the class to add the feature to
      * @param levelId id of the level to add the feature to
-     * @param featureItem actual
-     * @param featureType 
+     * @param featureType type of the feature
+     * @param featureItem actual item to add
      */
     addFeatureFor(classId: string, levelId: string, featureType: FeatureType, featureItem: Item): Promise<ClassProgression[]>
 
+    /**
+     * Find feature of class within its level
+     * @param classId id of the class to look up
+     * @param levelId id of the level to look up
+     * @param featureId id of the actual item
+     */
     findFeatureOf(classId: string, levelId: string, featureId: string): Promise<ItemReference | null>
 
 }

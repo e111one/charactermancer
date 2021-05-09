@@ -5,14 +5,27 @@ export class ClassProgression {
 
     }
 
+    public get class(): ItemReference {
+        return this.cls;
+    }
+
+    /**
+     * Return copy of this progression with the new class
+     */
     withClass(cls: ItemReference): ClassProgression {
         return new ClassProgression(cls, this.levels)
     }
 
+    /**
+     * Return copy of this progression with new levels
+     */
     withLevels(levels: Array<ClassLevel>): ClassProgression {
         return new ClassProgression(this.cls, levels)
     }
 
+    /**
+     * Check if this progression contains the required class id
+     */
     containsClass(classId: string): boolean {
         switch (this.cls._type) {
             case "id":
@@ -22,18 +35,68 @@ export class ClassProgression {
         }
     }
 
+    /**
+     * Return copy of this object with all the internal items dereferenced 
+     * @param compendiumRepository compendium repository to deref the items from
+     */
     async derefProgression(compendiumRepository: CompendiumRepository): Promise<ClassProgression> {
         const derefedClass = await this.derefClass(compendiumRepository)
         const derefedLevels = await Promise.all(this.levels.map(level => level.derefFeatures(compendiumRepository)))
         return derefedClass.withLevels(derefedLevels)
     }
 
+    /**
+     * Return copy of this object with all the internal items referenced
+     */
     refProgression(): ClassProgression {
         return this.refClass().withLevels(this.levels.map(l => l.refFeatures()))
     }
 
+    /**
+     * Try to find a feature within the specified level
+     */
     findFeature(levelId: string, featureId: string): ItemReference | null {
         return this.levels.find(l => l.id === levelId)?.features.findFeature(featureId)
+    }
+
+    /**
+     * Return copy of this object with the new feature created within the specified level id
+     */
+    public addFeature(featureType: FeatureType, levelId: string, itemRef: ItemReference): ClassProgression {
+        switch (featureType) {
+            case FeatureTypes.Granted:
+                return this.withLevels(this.levels.map(l => {
+                    if (l.id === levelId) {
+                        return l.addGranted(itemRef)
+                    } else {
+                        return l
+                    }
+                }))
+            case FeatureTypes.Option:
+                return this.withLevels(this.levels.map(l => {
+                    if (l.id === levelId) {
+                        return l.addOption(itemRef)
+                    } else {
+                        return l
+                    }
+                }))
+            case FeatureTypes.Prerequisite:
+                return this.withLevels(this.levels.map(l => {
+                    if (l.id === levelId) {
+                        return l.addPrerequisite(itemRef)
+                    } else {
+                        return l
+                    }
+                }))
+        }
+    }
+
+    /**
+     * Return copy of this progression with the new level appended
+     */
+    public addLevel(): ClassProgression {
+        const lvl = new ClassLevel(this.randomString(), this.levels.length + 1, new LevelFeatures())
+        return this.withLevels([...this.levels, lvl])
     }
 
     private async derefClass(compendiumRepository: CompendiumRepository): Promise<ClassProgression> {
@@ -68,44 +131,6 @@ export class ClassProgression {
 
     }
 
-    public get class(): ItemReference {
-        return this.cls;
-    }
-
-    public addFeature(featureType: FeatureType, levelId: string, itemRef: ItemReference): ClassProgression {
-        switch (featureType) {
-            case FeatureTypes.Granted:
-                return this.withLevels(this.levels.map(l => {
-                    if (l.id === levelId) {
-                        return l.addGranted(itemRef)
-                    } else {
-                        return l
-                    }
-                }))
-            case FeatureTypes.Option:
-                return this.withLevels(this.levels.map(l => {
-                    if (l.id === levelId) {
-                        return l.addOption(itemRef)
-                    } else {
-                        return l
-                    }
-                }))
-            case FeatureTypes.Prerequisite:
-                return this.withLevels(this.levels.map(l => {
-                    if (l.id === levelId) {
-                        return l.addPrerequisite(itemRef)
-                    } else {
-                        return l
-                    }
-                }))
-        }
-    }
-
-    public addLevel(): ClassProgression {
-        const lvl = new ClassLevel(this.randomString(), this.levels.length + 1, new LevelFeatures())
-        return this.withLevels([...this.levels, lvl])
-    }
-
     private randomString(): string {
         return Math.random().toString(36).substr(2, 5);
     }
@@ -116,10 +141,17 @@ export class ClassLevel {
 
     }
 
+    /**
+     * Return copy of this object with all the internal items dereferenced
+     * @param compendiumRepository compendium repository to deref the items from
+     */
     async derefFeatures(compendiumRepository: CompendiumRepository): Promise<ClassLevel> {
         return new ClassLevel(this.id, this.level, await this.features.derefFeatures(compendiumRepository))
     }
 
+    /**
+     * Return copy of this object with all the internal items referenced
+     */
     refFeatures(): ClassLevel {
         return new ClassLevel(this.id, this.level, this.features.refFeatures())
     }
@@ -139,17 +171,16 @@ export class ClassLevel {
 
 export class LevelFeatures {
 
-    readonly granted: Items
-    readonly options: Items
-    readonly prerequisites: Items & Prerequisites
-
-
-    constructor(granted?: Items, options?: Items, prerequisites?: Items & Prerequisites) {
-        this.granted = granted || { items: [] }
-        this.options = options || { items: [] }
-        this.prerequisites = prerequisites || { items: [], prerequisites: [] }
+    constructor(
+        readonly granted: Items = { items: [] },
+        readonly options: Items = { items: [] },
+        readonly prerequisites: Items & Prerequisites = { items: [], prerequisites: [] }) {
     }
 
+    /**
+     * Return copy of this object with all the internal items dereferenced
+     * @param compendiumRepository compendium repository to deref the items from
+     */
     async derefFeatures(compendiumRepository: CompendiumRepository): Promise<LevelFeatures> {
         return new LevelFeatures({
             items: await this.derefItems(compendiumRepository, this.granted.items)
@@ -160,6 +191,9 @@ export class LevelFeatures {
         })
     }
 
+    /**
+     * Return copy of this object with all the internal items referenced
+     */
     refFeatures(): LevelFeatures {
         return new LevelFeatures({
             items: this.refItems(this.granted.items)
@@ -170,6 +204,9 @@ export class LevelFeatures {
         })
     }
 
+    /**
+     * Try to find the feature by its id
+     */
     findFeature(id: string): ItemReference | null {
         return this.granted.items.find(ref => ref.id === id) || this.options.items.find(ref => ref.id === id) || this.prerequisites.items.find(ref => ref.id === id)
     }

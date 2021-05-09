@@ -18,8 +18,9 @@ export class ProgressionForm {
             }
 
             protected async _updateObject(event: Event, formData?: object) {
-                //progressionRepository.writeProgression([] /*this.referenceProgressions(this.progressions)*/);
+                //everything is already saved
             }
+
             /**
              * Data that is fed to Handlebars template
              * @param options 
