@@ -18,7 +18,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build --clean",
     "watch:build": "tsc --watch",
-    "start": "npm-run-all build --parallel watch:build --print-label"
+    "start": "npm-run-all build --parallel watch:build --print-label",
+    "format": "prettier --write ."
   },
   "author": "Sergey K",
   "license": "MIT"
