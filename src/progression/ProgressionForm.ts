@@ -43,6 +43,7 @@ export class ProgressionForm {
                 super.activateListeners(html)
                 this.bindAddLevelButtons(html)
                 this.bindItemSheetClicks(html)
+                this.bindDragHighlight(html)
             }
 
             private bindAddLevelButtons(html: JQuery): void {
@@ -71,6 +72,35 @@ export class ProgressionForm {
                         }
                     });
                 });
+            }
+
+            private bindDragHighlight(html: JQuery): void {
+                html.find(".features").map((_, element) => {
+                    let [onDragEnter, onDragLeave, onDrop] = [element.ondragenter, element.ondragleave, element.ondrop]
+                    let className = "features-target"
+                    let counter = 0;
+                    element.ondragenter = (event) => {
+                        counter++;
+                        onDragEnter?.call(null, event)
+                        if (counter > 0) {
+                            element.classList.add(className)
+                        }
+                    }
+
+                    element.ondragleave = (event) => {
+                        counter--;
+                        onDragLeave?.call(null, event)
+                        if (counter <= 0) {
+                            element.classList.remove(className)
+                        }
+                    }
+
+                    element.ondrop = (event) => {
+                        counter = 0;
+                        onDrop?.call(null, event)
+                        element.classList.remove(className)
+                    }
+                })
             }
 
             /**
