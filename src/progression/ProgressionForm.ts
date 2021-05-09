@@ -1,10 +1,10 @@
 import { Config } from "../config.js";
 import { ProgressionRepository } from "./ProgressionRepository.js";
-import { ClassProgression, FeatureType, ItemReference } from "./ClassProgression.js";
+import { ClassProgression, FeatureType, IdRef, ItemRef, ItemReference } from "./ClassProgression.js";
 import { CompendiumRepository } from "./CompendiumRepository.js";
 
 export type ProgressionSettings = {
-    progressions: Array<ClassProgression>
+    progressions: Array<ClassProgression<ItemRef>>
 }
 export class ProgressionForm {
 
@@ -63,10 +63,7 @@ export class ProgressionForm {
                         let itemId = element.getAttribute("data-item-id")
 
                         progressionRepository.findFeatureOf(classId, levelId, itemId).then(ref => {
-                            switch (ref?._type) {
-                                case "item":
-                                    ref.item.sheet.render(true)
-                            }
+                            ref.item.sheet.render(true)
                         })
                     });
                 });
@@ -174,7 +171,7 @@ export class ProgressionForm {
              * @param item item to look for in compendiums
              * @param dropTarget target to add the resolved item to
              */
-            private async addFromCompendium(item: DropItem, dropTarget: DropTarget): Promise<ClassProgression[]> {
+            private async addFromCompendium(item: DropItem, dropTarget: DropTarget): Promise<ClassProgression<IdRef>[]> {
                 let compendiumItem = await compendiumRepository.findItemByPackAndId(item.pack, item.id)
 
                 if (dropTarget._type === "class" && compendiumItem.data.type === "class") {
@@ -189,17 +186,17 @@ export class ProgressionForm {
              * @param classItem resolved class item
              * @param pack options package id if the item was from compendium
              */
-            private async addClass(classItem: Item, pack?: string): Promise<ClassProgression[]> {
+            private async addClass(classItem: Item, pack?: string): Promise<ClassProgression<IdRef>[]> {
                 let progs = await progressionRepository.addClass(classItem);
                 this._tabs[0].active = classItem.data._id
                 return progs
             }
 
-            private addFeature(featureItem: Item, featureType: FeatureType, classId: string, levelId: string): Promise<ClassProgression[]> {
+            private addFeature(featureItem: Item, featureType: FeatureType, classId: string, levelId: string): Promise<ClassProgression<IdRef>[]> {
                 return progressionRepository.addFeatureFor(classId, levelId, featureType, featureItem)
             }
 
-            private addLevel(classId: string): Promise<ClassProgression[]> {
+            private addLevel(classId: string): Promise<ClassProgression<IdRef>[]> {
                 return progressionRepository.addLevelOf(classId)
             }
 

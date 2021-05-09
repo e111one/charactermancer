@@ -1,4 +1,4 @@
-import { ClassLevel, ClassProgression, FeatureType, ItemReference, LevelFeatures } from "./ClassProgression.js";
+import { ClassLevel, ClassProgression, FeatureType, IdRef, ItemRef, ItemReference, LevelFeatures } from "./ClassProgression.js";
 import { Config } from "../config.js";
 import { CompendiumRepository } from "./CompendiumRepository.js";
 
@@ -7,24 +7,24 @@ export interface ProgressionRepository {
     /**
      * Read progression list from the storage
      */
-    readProgression(): Promise<ClassProgression[]>
+    readProgression(): Promise<ClassProgression<ItemRef>[]>
 
     /**
      * Update progression list in the storage
      */
-    writeProgression(prog: ClassProgression[]): Promise<ClassProgression[]>
+    writeProgression(prog: ClassProgression<ItemRef>[]): Promise<ClassProgression<IdRef>[]>
 
     /**
      * Add new class to the progression
      * @param classItem
      */
-    addClass(classItem: Item): Promise<ClassProgression[]>
+    addClass(classItem: Item): Promise<ClassProgression<IdRef>[]>
 
     /**
      * Add new empty level to the class.
      * @param classId class id to add the level to
      */
-    addLevelOf(classId: string): Promise<ClassProgression[]>
+    addLevelOf(classId: string): Promise<ClassProgression<IdRef>[]>
 
     /**
      * Add new feature to the class.level.featureType
@@ -33,7 +33,7 @@ export interface ProgressionRepository {
      * @param featureType type of the feature
      * @param featureItem actual item to add
      */
-    addFeatureFor(classId: string, levelId: string, featureType: FeatureType, featureItem: Item): Promise<ClassProgression[]>
+    addFeatureFor(classId: string, levelId: string, featureType: FeatureType, featureItem: Item): Promise<ClassProgression<IdRef>[]>
 
     /**
      * Find feature of class within its level
@@ -41,7 +41,7 @@ export interface ProgressionRepository {
      * @param levelId id of the level to look up
      * @param featureId id of the actual item
      */
-    findFeatureOf(classId: string, levelId: string, featureId: string): Promise<ItemReference | null>
+    findFeatureOf(classId: string, levelId: string, featureId: string): Promise<ItemRef | null>
 
 }
 
@@ -53,7 +53,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         this.init()
     }
 
-    async addLevelOf(classId: string): Promise<ClassProgression[]> {
+    async addLevelOf(classId: string): Promise<ClassProgression<IdRef>[]> {
         const progs = await this.readProgression()
         return this.writeProgression(progs.map(prog => {
             if (prog.class.id === classId) {
@@ -64,7 +64,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         }))
     }
 
-    async addFeatureFor(classId: string, levelId: string, featureType: FeatureType, featureItem: Item) {
+    async addFeatureFor(classId: string, levelId: string, featureType: FeatureType, featureItem: Item): Promise<ClassProgression<IdRef>[]> {
         const progs = await this.readProgression()
 
         return this.writeProgression(progs.map(prog => {
@@ -80,16 +80,16 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         }))
     }
 
-    async findFeatureOf(classId: string, levelId: string, featureId: string): Promise<ItemReference | null> {
+    async findFeatureOf(classId: string, levelId: string, featureId: string): Promise<ItemRef | null> {
         let progs = await this.readProgression();
         return progs.find(prog => prog.class.id === classId)?.findFeature(levelId, featureId)
     }
 
-    async addClass(classItem: Item): Promise<ClassProgression[]> {
+    async addClass(classItem: Item): Promise<ClassProgression<IdRef>[]> {
         let progs = await this.readProgression()
         let prog = progs.find(p => p.containsClass(classItem.data._id))
-        if (prog) return Promise.resolve().then(_ => progs);
-        return this.writeProgression([...progs, new ClassProgression({
+        if (prog) return Promise.resolve().then(_ => progs.map(p => p.refProgression()));
+        return this.writeProgression([...progs, new ClassProgression<ItemRef>({
             _type: "item",
             id: classItem._id,
             item: classItem
@@ -114,7 +114,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         }
     }
 
-    readProgression(): Promise<ClassProgression[]> {
+    readProgression(): Promise<ClassProgression<ItemRef>[]> {
         const progs = this.settings.get(this.config.name, this.config.progressionRepositoryName) as Progs
         return Promise.all(progs.progs.map(p => {
             //foundry stores plain JSON in settings, and therefore 
@@ -127,7 +127,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         }))
     }
 
-    writeProgression(prog: ClassProgression[]): Promise<ClassProgression[]> {
+    writeProgression(prog: ClassProgression<ItemRef>[]): Promise<ClassProgression<IdRef>[]> {
         return this.settings.set(this.config.name, this.config.progressionRepositoryName, {
             progs: prog.map(p => p.refProgression())
         }).then(p => p.progs)
@@ -138,5 +138,5 @@ export class FoundryProgressionRepository implements ProgressionRepository {
  * Object to store in FoundryVTT settings
  */
 type Progs = {
-    progs: ClassProgression[]
+    progs: ClassProgression<IdRef>[]
 }
