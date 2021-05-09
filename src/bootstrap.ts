@@ -11,8 +11,8 @@ export default class Bootstrap {
     static init() {
         Hooks.on("init", () => {
             Hooks.on("renderCompendiumDirectory", () => {
-                const progressionRepository = new FoundryProgressionRepository(game.settings, Config)
                 const compendiumRepository = new FoundryCompendiumRepository(game.packs)
+                const progressionRepository = new FoundryProgressionRepository(game.settings, compendiumRepository, Config)
                 ProgressionForm.setupForm(game.settings, progressionRepository, compendiumRepository, Config);
             });
         });
