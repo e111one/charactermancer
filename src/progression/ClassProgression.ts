@@ -212,18 +212,21 @@ export class LevelFeatures {
     }
 
     addGranted(reference: ItemReference): LevelFeatures {
+        if (this.findFeature(reference.id)) return this;
         return new LevelFeatures({
             items: [...this.granted.items, reference]
         }, this.options, this.prerequisites)
     }
 
     addOption(reference: ItemReference): LevelFeatures {
+        if (this.findFeature(reference.id)) return this;
         return new LevelFeatures(this.granted, {
             items: [...this.options.items, reference]
         }, this.prerequisites)
     }
 
     addPrerequisite(reference: ItemReference): LevelFeatures {
+        if (this.findFeature(reference.id)) return this;
         return new LevelFeatures(this.granted, this.options, {
             items: [...this.prerequisites.items, reference]
         })
