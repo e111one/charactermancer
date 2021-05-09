@@ -216,31 +216,31 @@ export class LevelFeatures<R extends ItemReference> {
     }
 
     addPrerequisite(reference: R): LevelFeatures<R> {
-        if (this.findFeature(reference.id)) return this;
+        
         return new LevelFeatures(this.granted, this.options, {
             items: [...this.prerequisites.items, reference]
         })
     }
 
     private async derefItems(compendiumRepository: CompendiumRepository, items: Array<R>): Promise<Array<ItemRef>> {
-        return Promise.all(items.map(async ref => {
+        return Promise.all(items.map(async (ref: ItemReference) => {
             switch (ref._type) {
                 case "id":
-                    let resolved = await compendiumRepository.findItemByPackAndId((ref as IdRef).pack, ref.id)
+                    let resolved = await compendiumRepository.findItemByPackAndId(ref.pack, ref.id)
                     const itemRef: ItemRef = {
                         _type: "item",
                         id: resolved._id,
                         item: resolved
                     }
                     return itemRef;
-                case "item":
-                    return (ref as ItemRef)
+                default:
+                    return ref
             }
         }));
     }
 
     private refItems(items: Array<ItemReference>): Array<IdRef> {
-        return items.map(ref => {
+        return items.map((ref: ItemReference) => {
             switch (ref._type) {
                 case "item": {
                     let pack: string | null;
