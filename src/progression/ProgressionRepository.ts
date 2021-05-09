@@ -87,6 +87,8 @@ export class FoundryProgressionRepository implements ProgressionRepository {
 
     async addClass(classItem: Item): Promise<ClassProgression[]> {
         let progs = await this.readProgression()
+        let prog = progs.find(p => p.containsClass(classItem.data._id))
+        if (prog) return Promise.resolve().then(_ => progs);
         return this.writeProgression([...progs, new ClassProgression({
             _type: "item",
             id: classItem._id,
