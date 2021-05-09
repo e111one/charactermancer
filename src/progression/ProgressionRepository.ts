@@ -123,7 +123,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     const progs = await this.readProgression();
     const prog = progs.find((p) => p.containsClass(classItem.data._id));
     if (prog)
-      return Promise.resolve().then(_void =>
+      return Promise.resolve().then((_void) =>
         progs.map((p) => p.refProgression())
       );
     return this.writeProgression([
