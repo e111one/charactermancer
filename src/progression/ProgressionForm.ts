@@ -1,6 +1,6 @@
 import { Config } from "../config.js";
 import { ProgressionRepository } from "./ProgressionRepository.js";
-import { ClassProgression, ItemReference } from "./ClassProgression.js";
+import { ClassProgression, FeatureType, ItemReference } from "./ClassProgression.js";
 import { CompendiumRepository } from "./CompendiumRepository.js";
 
 export type ProgressionSettings = {
@@ -11,16 +11,14 @@ export class ProgressionForm {
     static factory(settings: ClientSettings, progressionRepository: ProgressionRepository, compendiumRepository: CompendiumRepository, config: Config): ConstructorOf<FormApplication<FormApplication.Options, FormApplication.Data<ProgressionSettings>, ProgressionSettings>> {
         return class Form extends FormApplication<FormApplication.Options, FormApplication.Data<ProgressionSettings>, ProgressionSettings> {
 
-            private progressions: ClassProgression[];
             private _currentTab: string
 
             constructor(progression?: ProgressionSettings, options?: Partial<FormApplication.Options>) {
                 super(progression, options)
-                this.progressions = progressionRepository.readProgression()
             }
 
             protected async _updateObject(event: Event, formData?: object) {
-                progressionRepository.writeProgression([] /*this.referenceProgressions(this.progressions)*/);
+                //progressionRepository.writeProgression([] /*this.referenceProgressions(this.progressions)*/);
             }
             /**
              * Data that is fed to Handlebars template
@@ -28,10 +26,10 @@ export class ProgressionForm {
              * @returns progressions list resolved into actual items
              */
             getData(options?: Application.RenderOptions): FormApplication.Data<ProgressionSettings> | Promise<FormApplication.Data<ProgressionSettings>> {
-                return this.resolveProgression(this.progressions).then(_ => {
+                return progressionRepository.readProgression().then(progs => {
                     return {
                         object: duplicate({
-                            progressions: this.progressions
+                            progressions: progs
                         }),
                         options: Form.defaultOptions,
                         title: Form.defaultOptions.title
@@ -51,8 +49,7 @@ export class ProgressionForm {
                     element.addEventListener("click", (event) => {
                         event.preventDefault()
                         let classId = element.getAttribute("data-class-id")
-                        this.addLevel(classId)
-                        this.render()
+                        this.addLevel(classId).then(_ => this.render())
                     })
                 });
             }
@@ -64,12 +61,12 @@ export class ProgressionForm {
                         let levelId = element.getAttribute("data-level-id")
                         let itemId = element.getAttribute("data-item-id")
 
-                        let ref = this.progressions.find(prog => prog.class.id === classId)?.findFeature(levelId, itemId)
-
-                        switch (ref?._type) {
-                            case "item":
-                                ref.item.sheet.render(true)
-                        }
+                        progressionRepository.findFeatureOf(classId, levelId, itemId).then(ref => {
+                            switch (ref?._type) {
+                                case "item":
+                                    ref.item.sheet.render(true)
+                            }
+                        })
                     });
                 });
             }
@@ -176,13 +173,13 @@ export class ProgressionForm {
              * @param item item to look for in compendiums
              * @param dropTarget target to add the resolved item to
              */
-            private async addFromCompendium(item: DropItem, dropTarget: DropTarget): Promise<void> {
+            private async addFromCompendium(item: DropItem, dropTarget: DropTarget): Promise<ClassProgression[]> {
                 let compendiumItem = await compendiumRepository.findItemByPackAndId(item.pack, item.id)
 
                 if (dropTarget._type === "class" && compendiumItem.data.type === "class") {
-                    this.addClass(compendiumItem, item.pack)
+                    return this.addClass(compendiumItem, item.pack)
                 } else if (dropTarget._type === "level") {
-                    this.addFeature(compendiumItem, dropTarget.featureType, dropTarget.classId, dropTarget.levelId, item.pack)
+                    return this.addFeature(compendiumItem, dropTarget.featureType, dropTarget.classId, dropTarget.levelId)
                 }
             }
 
@@ -191,43 +188,18 @@ export class ProgressionForm {
              * @param classItem resolved class item
              * @param pack options package id if the item was from compendium
              */
-            private addClass(classItem: Item, pack?: string): void {
+            private async addClass(classItem: Item, pack?: string): Promise<ClassProgression[]> {
+                let progs = await progressionRepository.addClass(classItem);
                 this._tabs[0].active = classItem.data._id
-                this.progressions.push(new ClassProgression({
-                    _type: "item",
-                    id: classItem._id,
-                    item: classItem
-                }))
+                return progs
             }
 
-            private addFeature(featureItem: Item, featureType: FeatureType, classId: string, levelId: string, pack?: string): void {
-                const cls = this.progressions.find(prog => prog.class.id === classId)
-                cls?.addFeature(featureType, levelId, {
-                    _type: "item",
-                    id: featureItem._id,
-                    item: featureItem
-                })
+            private addFeature(featureItem: Item, featureType: FeatureType, classId: string, levelId: string): Promise<ClassProgression[]> {
+                return progressionRepository.addFeatureFor(classId, levelId, featureType, featureItem)
             }
 
-            private addLevel(classId: string): void {
-                const cls = this.progressions.find(prog => prog.class.id === classId)
-                cls?.addLevel()
-            }
-
-            /**
-             * Map over progressions and resolve identifiers to the actual items from compendium or items list
-             * @param progs list of progressions
-             */
-            private async resolveProgression(progs: ClassProgression[]): Promise<void> {
-                await Promise.all(this.progressions.map(p => p.derefItems(compendiumRepository)))
-            }
-
-            /**
-             * Reverse operation to `resolveProgression`
-             * @param progs list of progressions
-             */
-            private referenceProgression(progs: ClassProgression[]): void {
-                this.progressions.map(p => p.refItems())
+            private addLevel(classId: string): Promise<ClassProgression[]> {
+                return progressionRepository.addLevelOf(classId)
             }
 
             static get defaultOptions(): FormApplication.Options {
@@ -286,9 +258,3 @@ type ClassTarget = {
 }
 
 type DropTarget = ClassTarget | LevelTarget //@TODO proper targets
-
-type RegularFeature = "granted"
-type OptionalFeature = "option"
-type PrerequisiteFeature = "prerequisite"
-
-type FeatureType = RegularFeature | OptionalFeature | PrerequisiteFeature
