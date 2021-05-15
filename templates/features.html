@@ -11,7 +11,13 @@
       <img class="feature-image" src="{{feature.item.img}}" />
       <span class="feature-name">{{feature.item.name}}</span>
     </a>
-    <a class="feature-delete"><i class="fas fa-trash"></i></a>
+    <a
+      class="feature-delete"
+      data-class-id="{{../classId}}"
+      data-item-id="{{feature.item._id}}"
+      data-level-id="{{../levelId}}"
+      ><i class="fas fa-trash"></i
+    ></a>
   </div>
   {{/each}}
 </div>
