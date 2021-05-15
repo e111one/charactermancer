@@ -98,6 +98,20 @@ export class ClassProgression<R extends ItemReference> {
     }
   }
 
+  public removeFeature(
+    levelId: string,
+    itemId: string
+  ): ClassProgression<R> {
+    return this.withLevels(
+          this.levels.map((l) => {
+            if (l.id === levelId) {
+              return l.removeFeature(itemId);
+            } else {
+              return l;
+            }
+          }))
+  }
+
   /**
    * Return copy of this progression with the new level appended
    */
@@ -204,6 +218,14 @@ export class ClassLevel<R extends ItemReference> {
       this.features.addPrerequisite(reference)
     );
   }
+
+  removeFeature(itemId:string): ClassLevel<R> {
+    return new ClassLevel(
+      this.id,
+      this.level,
+      this.features.removeFeature(itemId)
+    );
+  }
 }
 
 export class LevelFeatures<R extends ItemReference> {
@@ -292,6 +314,20 @@ export class LevelFeatures<R extends ItemReference> {
     return new LevelFeatures(this.granted, this.options, {
       items: [...this.prerequisites.items, reference],
     });
+  }
+
+  removeFeature(itemId:string): LevelFeatures<R> {
+    return new LevelFeatures(
+      {
+      items: this.granted.items.filter((feature) => feature.id !== itemId)
+    },
+      {
+      items: this.options.items.filter((feature) => feature.id !== itemId)
+    },
+      {
+      items: this.prerequisites.items.filter((feature) => feature.id !== itemId)
+    }
+    )
   }
 
   private async derefItems(

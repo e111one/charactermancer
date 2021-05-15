@@ -48,6 +48,12 @@ export interface ProgressionRepository {
     featureItem: Item
   ): Promise<ClassProgression<IdRef>[]>;
 
+  removeFeatureOf(
+    classId: string,
+    levelId: string,
+    itemId: string
+  ): Promise<ClassProgression<IdRef>[]>;
+
   /**
    * Find feature of class within its level
    * @param classId id of the class to look up
@@ -106,6 +112,15 @@ export class FoundryProgressionRepository implements ProgressionRepository {
         }
       })
     );
+  }
+
+  async removeFeatureOf(
+    classId: string,
+    levelId: string,
+    itemId: string
+  ): Promise<ClassProgression<IdRef>[]> {
+    const progs = await this.readProgression();
+        return this.writeProgression(progs.map(prog => prog.removeFeature(levelId, itemId)))
   }
 
   async findFeatureOf(
