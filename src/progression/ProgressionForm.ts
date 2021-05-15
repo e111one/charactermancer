@@ -4,7 +4,7 @@ import {
   ClassProgression,
   FeatureType,
   IdRef,
-  ItemRef
+  ItemRef,
 } from "./ClassProgression.js";
 import { CompendiumRepository } from "./CompendiumRepository.js";
 
@@ -96,16 +96,18 @@ export class ProgressionForm {
         });
       }
 
-      private removeFeatureItemClicks(html: JQuery):void {
+      private removeFeatureItemClicks(html: JQuery): void {
         html.find(".feature-delete").map((_, element) => {
           element.addEventListener("click", (event) => {
-            event.preventDefault();            
+            event.preventDefault();
             const classId = element.getAttribute("data-class-id");
             const levelId = element.getAttribute("data-level-id");
             const itemId = element.getAttribute("data-item-id");
-            void progressionRepository.removeFeatureOf(classId, levelId, itemId).then((_) => this.render())
-          })
-        })
+            void progressionRepository
+              .removeFeatureOf(classId, levelId, itemId)
+              .then((_) => this.render());
+          });
+        });
       }
 
       private bindDragHighlight(html: JQuery): void {

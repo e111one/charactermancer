@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "Streamlines the character creation & level up",
   "main": "charactermancer.js",
-  "dependencies": {},
   "devDependencies": {
     "@league-of-foundry-developers/foundry-vtt-types": "^0.7.9-6",
     "@typescript-eslint/eslint-plugin": "^4.22.1",

@@ -98,18 +98,16 @@ export class ClassProgression<R extends ItemReference> {
     }
   }
 
-  public removeFeature(
-    levelId: string,
-    itemId: string
-  ): ClassProgression<R> {
+  public removeFeature(levelId: string, itemId: string): ClassProgression<R> {
     return this.withLevels(
-          this.levels.map((l) => {
-            if (l.id === levelId) {
-              return l.removeFeature(itemId);
-            } else {
-              return l;
-            }
-          }))
+      this.levels.map((l) => {
+        if (l.id === levelId) {
+          return l.removeFeature(itemId);
+        } else {
+          return l;
+        }
+      })
+    );
   }
 
   /**
@@ -219,7 +217,7 @@ export class ClassLevel<R extends ItemReference> {
     );
   }
 
-  removeFeature(itemId:string): ClassLevel<R> {
+  removeFeature(itemId: string): ClassLevel<R> {
     return new ClassLevel(
       this.id,
       this.level,
@@ -316,18 +314,20 @@ export class LevelFeatures<R extends ItemReference> {
     });
   }
 
-  removeFeature(itemId:string): LevelFeatures<R> {
+  removeFeature(itemId: string): LevelFeatures<R> {
     return new LevelFeatures(
       {
-      items: this.granted.items.filter((feature) => feature.id !== itemId)
-    },
+        items: this.granted.items.filter((feature) => feature.id !== itemId),
+      },
       {
-      items: this.options.items.filter((feature) => feature.id !== itemId)
-    },
+        items: this.options.items.filter((feature) => feature.id !== itemId),
+      },
       {
-      items: this.prerequisites.items.filter((feature) => feature.id !== itemId)
-    }
-    )
+        items: this.prerequisites.items.filter(
+          (feature) => feature.id !== itemId
+        ),
+      }
+    );
   }
 
   private async derefItems(

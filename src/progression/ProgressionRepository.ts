@@ -120,7 +120,9 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     itemId: string
   ): Promise<ClassProgression<IdRef>[]> {
     const progs = await this.readProgression();
-        return this.writeProgression(progs.map(prog => prog.removeFeature(levelId, itemId)))
+    return this.writeProgression(
+      progs.map((prog) => prog.removeFeature(levelId, itemId))
+    );
   }
 
   async findFeatureOf(
