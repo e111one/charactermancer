@@ -50,7 +50,11 @@ export class ClassProgression<R extends ItemReference> {
   /**
    * Try to find a feature within the specified level
    */
-  findFeature(levelId: string, featureSetId: string, featureId: string): R | null {
+  findFeature(
+    levelId: string,
+    featureSetId: string,
+    featureId: string
+  ): R | null {
     return this.levels
       .find((l) => l.id === levelId)
       ?.features.findFeature(featureSetId, featureId);
@@ -282,7 +286,7 @@ export class LevelFeatures<R extends ItemReference> {
    * Try to find the feature by its id
    */
   findFeature(featureSetId: string, id: string): R | null {
-    return this.findFeatureIn(this.featureSets[featureSetId], id)
+    return this.findFeatureIn(this.featureSets[featureSetId], id);
   }
 
   addGranted(featureSetId: string, reference: R): LevelFeatures<R> {

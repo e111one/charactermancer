@@ -190,7 +190,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
       progs.progs.map((p) => {
         //foundry stores plain JSON in settings, and therefore
         const lvls = p.levels.map((l) => {
-          const featureSets = l.features.featureSets
+          const featureSets = l.features.featureSets;
           const features = new LevelFeatures(featureSets);
           return new ClassLevel(l.id, l.level, features);
         });
