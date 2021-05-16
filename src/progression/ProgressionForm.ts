@@ -85,10 +85,11 @@ export class ProgressionForm {
           element.addEventListener("click", (_) => {
             const classId = element.getAttribute("data-class-id");
             const levelId = element.getAttribute("data-level-id");
+            const featureSetId = element.getAttribute("data-feature-set-id");
             const itemId = element.getAttribute("data-item-id");
 
             void progressionRepository
-              .findFeatureOf(classId, levelId, itemId)
+              .findFeatureOf(classId, levelId, featureSetId, itemId)
               .then((ref) => {
                 ref.item.sheet.render(true);
               });
@@ -102,9 +103,10 @@ export class ProgressionForm {
             event.preventDefault();
             const classId = element.getAttribute("data-class-id");
             const levelId = element.getAttribute("data-level-id");
+            const featureSetId = element.getAttribute("data-feature-set-id");
             const itemId = element.getAttribute("data-item-id");
             void progressionRepository
-              .removeFeatureOf(classId, levelId, itemId)
+              .removeFeatureOf(classId, levelId, featureSetId, itemId)
               .then((_) => this.render());
           });
         });
@@ -196,6 +198,7 @@ export class ProgressionForm {
               featureType: "granted",
               levelId: target.getAttribute("data-level-id"),
               classId: target.getAttribute("data-class-id"),
+              featureSetId: target.getAttribute("data-feature-set-id"),
             };
           } else if (
             target.classList.contains("features") &&
@@ -206,6 +209,7 @@ export class ProgressionForm {
               featureType: "option",
               levelId: target.getAttribute("data-level-id"),
               classId: target.getAttribute("data-class-id"),
+              featureSetId: target.getAttribute("data-feature-set-id"),
             };
           } else if (
             target.classList.contains("features") &&
@@ -216,6 +220,7 @@ export class ProgressionForm {
               featureType: "prerequisite",
               levelId: target.getAttribute("data-level-id"),
               classId: target.getAttribute("data-class-id"),
+              featureSetId: target.getAttribute("data-feature-set-id"),
             };
           }
         } else {
@@ -248,7 +253,8 @@ export class ProgressionForm {
             compendiumItem,
             dropTarget.featureType,
             dropTarget.classId,
-            dropTarget.levelId
+            dropTarget.levelId,
+            dropTarget.featureSetId
           );
         }
       }
@@ -270,12 +276,14 @@ export class ProgressionForm {
         featureItem: Item,
         featureType: FeatureType,
         classId: string,
-        levelId: string
+        levelId: string,
+        featureSetId: string
       ): Promise<ClassProgression<IdRef>[]> {
         return progressionRepository.addFeatureFor(
           classId,
           levelId,
           featureType,
+          featureSetId,
           featureItem
         );
       }
@@ -342,6 +350,7 @@ type LevelTarget = {
   featureType: FeatureType;
   levelId: string;
   classId: string;
+  featureSetId: string;
 };
 
 type ClassTarget = {

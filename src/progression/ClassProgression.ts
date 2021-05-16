@@ -50,10 +50,14 @@ export class ClassProgression<R extends ItemReference> {
   /**
    * Try to find a feature within the specified level
    */
-  findFeature(levelId: string, featureId: string): R | null {
+  findFeature(
+    levelId: string,
+    featureSetId: string,
+    featureId: string
+  ): R | null {
     return this.levels
       .find((l) => l.id === levelId)
-      ?.features.findFeature(featureId);
+      ?.features.findFeature(featureSetId, featureId);
   }
 
   /**
@@ -62,6 +66,7 @@ export class ClassProgression<R extends ItemReference> {
   public addFeature(
     featureType: FeatureType,
     levelId: string,
+    featureSetId: string,
     itemRef: R
   ): ClassProgression<R> {
     switch (featureType) {
@@ -69,7 +74,7 @@ export class ClassProgression<R extends ItemReference> {
         return this.withLevels(
           this.levels.map((l) => {
             if (l.id === levelId) {
-              return l.addGranted(itemRef);
+              return l.addGranted(featureSetId, itemRef);
             } else {
               return l;
             }
@@ -79,7 +84,7 @@ export class ClassProgression<R extends ItemReference> {
         return this.withLevels(
           this.levels.map((l) => {
             if (l.id === levelId) {
-              return l.addOption(itemRef);
+              return l.addOption(featureSetId, itemRef);
             } else {
               return l;
             }
@@ -89,7 +94,7 @@ export class ClassProgression<R extends ItemReference> {
         return this.withLevels(
           this.levels.map((l) => {
             if (l.id === levelId) {
-              return l.addPrerequisite(itemRef);
+              return l.addPrerequisite(featureSetId, itemRef);
             } else {
               return l;
             }
@@ -98,11 +103,15 @@ export class ClassProgression<R extends ItemReference> {
     }
   }
 
-  public removeFeature(levelId: string, itemId: string): ClassProgression<R> {
+  public removeFeature(
+    levelId: string,
+    featureSetId: string,
+    itemId: string
+  ): ClassProgression<R> {
     return this.withLevels(
       this.levels.map((l) => {
         if (l.id === levelId) {
-          return l.removeFeature(itemId);
+          return l.removeFeature(featureSetId, itemId);
         } else {
           return l;
         }
@@ -115,7 +124,7 @@ export class ClassProgression<R extends ItemReference> {
    */
   public addLevel(): ClassProgression<R> {
     const lvl = new ClassLevel(
-      this.randomString(),
+      randomString(),
       this.levels.length + 1,
       new LevelFeatures<R>()
     );
@@ -159,10 +168,6 @@ export class ClassProgression<R extends ItemReference> {
         return this as ClassProgression<IdRef>;
     }
   }
-
-  private randomString(): string {
-    return Math.random().toString(36).substr(2, 5);
-  }
 }
 
 export class ClassLevel<R extends ItemReference> {
@@ -193,46 +198,43 @@ export class ClassLevel<R extends ItemReference> {
     return new ClassLevel(this.id, this.level, this.features.refFeatures());
   }
 
-  addGranted(reference: R): ClassLevel<R> {
+  addGranted(featureSetId: string, reference: R): ClassLevel<R> {
     return new ClassLevel(
       this.id,
       this.level,
-      this.features.addGranted(reference)
+      this.features.addGranted(featureSetId, reference)
     );
   }
 
-  addOption(reference: R): ClassLevel<R> {
+  addOption(featureSetId: string, reference: R): ClassLevel<R> {
     return new ClassLevel(
       this.id,
       this.level,
-      this.features.addOption(reference)
+      this.features.addOption(featureSetId, reference)
     );
   }
 
-  addPrerequisite(reference: R): ClassLevel<R> {
+  addPrerequisite(featureSetId: string, reference: R): ClassLevel<R> {
     return new ClassLevel(
       this.id,
       this.level,
-      this.features.addPrerequisite(reference)
+      this.features.addPrerequisite(featureSetId, reference)
     );
   }
 
-  removeFeature(itemId: string): ClassLevel<R> {
+  removeFeature(featureSetId: string, itemId: string): ClassLevel<R> {
     return new ClassLevel(
       this.id,
       this.level,
-      this.features.removeFeature(itemId)
+      this.features.removeFeature(featureSetId, itemId)
     );
   }
 }
 
 export class LevelFeatures<R extends ItemReference> {
   constructor(
-    readonly granted: Items<R> = { items: [] },
-    readonly options: Items<R> = { items: [] },
-    readonly prerequisites: Items<R> & Prerequisites<R> = {
-      items: [],
-      prerequisites: [],
+    readonly featureSets: FeatureSets<R> = {
+      [randomString()]: emptyFeatureSet(),
     }
   ) {}
 
@@ -243,90 +245,114 @@ export class LevelFeatures<R extends ItemReference> {
   async derefFeatures(
     compendiumRepository: CompendiumRepository
   ): Promise<LevelFeatures<ItemRef>> {
-    return new LevelFeatures(
-      {
-        items: await this.derefItems(compendiumRepository, this.granted.items),
-      },
-      {
-        items: await this.derefItems(compendiumRepository, this.options.items),
-      },
-      {
-        items: await this.derefItems(
-          compendiumRepository,
-          this.prerequisites.items
-        ),
-      }
+    const derefed = await Promise.all(
+      Object.entries(this.featureSets).map<
+        Promise<[string, FeatureSet<ItemRef>]>
+      >(async ([key, value]) => {
+        const featureSet: FeatureSet<ItemRef> = {
+          granted: await this.derefItems(compendiumRepository, value.granted),
+          options: await this.derefItems(compendiumRepository, value.options),
+          prerequisites: await this.derefItems(
+            compendiumRepository,
+            value.prerequisites
+          ),
+        };
+        return [key, featureSet];
+      })
     );
+    return new LevelFeatures(Object.fromEntries(derefed));
   }
 
   /**
    * Return copy of this object with all the internal items referenced
    */
   refFeatures(): LevelFeatures<IdRef> {
-    return new LevelFeatures(
-      {
-        items: this.refItems(this.granted.items),
-      },
-      {
-        items: this.refItems(this.options.items),
-      },
-      {
-        items: this.refItems(this.prerequisites.items),
-      }
-    );
+    const refs = Object.entries(this.featureSets).map<
+      [string, FeatureSet<IdRef>]
+    >(([key, value]) => {
+      return [
+        key,
+        {
+          granted: this.refItems(value.granted),
+          options: this.refItems(value.options),
+          prerequisites: this.refItems(value.prerequisites),
+        },
+      ];
+    });
+    return new LevelFeatures(Object.fromEntries(refs));
   }
 
   /**
    * Try to find the feature by its id
    */
-  findFeature(id: string): R | null {
-    return (
-      this.granted.items.find((ref) => ref.id === id) ||
-      this.options.items.find((ref) => ref.id === id) ||
-      this.prerequisites.items.find((ref) => ref.id === id)
-    );
+  findFeature(featureSetId: string, id: string): R | null {
+    return this.findFeatureIn(this.featureSets[featureSetId], id);
   }
 
-  addGranted(reference: R): LevelFeatures<R> {
-    if (this.findFeature(reference.id)) return this;
-    return new LevelFeatures(
-      {
-        items: [...this.granted.items, reference],
+  addGranted(featureSetId: string, reference: R): LevelFeatures<R> {
+    if (this.findFeatureIn(this.featureSets[featureSetId], reference.id))
+      return this;
+    return new LevelFeatures({
+      ...this.featureSets,
+      [featureSetId]: {
+        ...this.featureSets[featureSetId],
+        granted: [...this.featureSets[featureSetId].granted, reference],
       },
-      this.options,
-      this.prerequisites
-    );
-  }
-
-  addOption(reference: R): LevelFeatures<R> {
-    return new LevelFeatures(
-      this.granted,
-      {
-        items: [...this.options.items, reference],
-      },
-      this.prerequisites
-    );
-  }
-
-  addPrerequisite(reference: R): LevelFeatures<R> {
-    return new LevelFeatures(this.granted, this.options, {
-      items: [...this.prerequisites.items, reference],
     });
   }
 
-  removeFeature(itemId: string): LevelFeatures<R> {
-    return new LevelFeatures(
-      {
-        items: this.granted.items.filter((feature) => feature.id !== itemId),
+  addOption(featureSetId: string, reference: R): LevelFeatures<R> {
+    if (this.findFeatureIn(this.featureSets[featureSetId], reference.id))
+      return this;
+    return new LevelFeatures({
+      ...this.featureSets,
+      [featureSetId]: {
+        ...this.featureSets[featureSetId],
+        options: [...this.featureSets[featureSetId].options, reference],
       },
-      {
-        items: this.options.items.filter((feature) => feature.id !== itemId),
+    });
+  }
+
+  addPrerequisite(featureSetId: string, reference: R): LevelFeatures<R> {
+    if (this.findFeatureIn(this.featureSets[featureSetId], reference.id))
+      return this;
+    return new LevelFeatures({
+      ...this.featureSets,
+      [featureSetId]: {
+        ...this.featureSets[featureSetId],
+        prerequisites: [
+          ...this.featureSets[featureSetId].prerequisites,
+          reference,
+        ],
       },
-      {
-        items: this.prerequisites.items.filter(
+    });
+  }
+
+  removeFeature(featureSetId: string, itemId: string): LevelFeatures<R> {
+    return new LevelFeatures({
+      ...this.featureSets,
+      [featureSetId]: {
+        granted: this.featureSets[featureSetId].granted.filter(
           (feature) => feature.id !== itemId
         ),
-      }
+        options: this.featureSets[featureSetId].options.filter(
+          (feature) => feature.id !== itemId
+        ),
+        prerequisites: this.featureSets[featureSetId].prerequisites.filter(
+          (feature) => feature.id !== itemId
+        ),
+      },
+    });
+  }
+
+  private findFeatureIn(
+    featureSet: FeatureSet<R>,
+    featureId: string
+  ): R | null {
+    return (
+      featureSet.granted.find((ref) => ref.id === featureId) ||
+      featureSet.options.find((ref) => ref.id === featureId) ||
+      featureSet.prerequisites.find((ref) => ref.id === featureId)
     );
   }
 
@@ -391,13 +417,25 @@ export type IdRef = {
 
 export type ItemReference = ItemRef | IdRef;
 
-type Items<R extends ItemReference> = {
-  items: Array<R>;
+type FeatureSets<R extends ItemReference> = Record<string, FeatureSet<R>>;
+
+type FeatureSet<R extends ItemReference> = {
+  prerequisites: Array<R>;
+  granted: Array<R>;
+  options: Array<R>;
 };
 
-type Prerequisites<R extends ItemReference> = {
-  prerequisites?: Array<R>;
-};
+function emptyFeatureSet<R extends ItemReference>(): FeatureSet<R> {
+  return {
+    prerequisites: [],
+    granted: [],
+    options: [],
+  };
+}
+
+function randomString(): string {
+  return Math.random().toString(36).substr(2, 5);
+}
 
 type RegularFeature = "granted";
 type OptionalFeature = "option";

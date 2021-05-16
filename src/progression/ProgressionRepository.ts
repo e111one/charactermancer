@@ -45,12 +45,14 @@ export interface ProgressionRepository {
     classId: string,
     levelId: string,
     featureType: FeatureType,
+    featureSetId: string,
     featureItem: Item
   ): Promise<ClassProgression<IdRef>[]>;
 
   removeFeatureOf(
     classId: string,
     levelId: string,
+    featureSetId: string,
     itemId: string
   ): Promise<ClassProgression<IdRef>[]>;
 
@@ -63,6 +65,7 @@ export interface ProgressionRepository {
   findFeatureOf(
     classId: string,
     levelId: string,
+    featureSetId: string,
     featureId: string
   ): Promise<ItemRef | null>;
 }
@@ -95,6 +98,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     classId: string,
     levelId: string,
     featureType: FeatureType,
+    featureSetId: string,
     featureItem: Item
   ): Promise<ClassProgression<IdRef>[]> {
     const progs = await this.readProgression();
@@ -102,7 +106,7 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     return this.writeProgression(
       progs.map((prog) => {
         if (prog.class.id === classId) {
-          return prog.addFeature(featureType, levelId, {
+          return prog.addFeature(featureType, levelId, featureSetId, {
             _type: "item",
             id: featureItem._id,
             item: featureItem,
@@ -117,23 +121,25 @@ export class FoundryProgressionRepository implements ProgressionRepository {
   async removeFeatureOf(
     classId: string,
     levelId: string,
+    featureSetId: string,
     itemId: string
   ): Promise<ClassProgression<IdRef>[]> {
     const progs = await this.readProgression();
     return this.writeProgression(
-      progs.map((prog) => prog.removeFeature(levelId, itemId))
+      progs.map((prog) => prog.removeFeature(levelId, featureSetId, itemId))
     );
   }
 
   async findFeatureOf(
     classId: string,
     levelId: string,
+    featureSetId: string,
     featureId: string
   ): Promise<ItemRef | null> {
     const progs = await this.readProgression();
     return progs
       .find((prog) => prog.class.id === classId)
-      ?.findFeature(levelId, featureId);
+      ?.findFeature(levelId, featureSetId, featureId);
   }
 
   async addClass(classItem: Item): Promise<ClassProgression<IdRef>[]> {
@@ -184,12 +190,8 @@ export class FoundryProgressionRepository implements ProgressionRepository {
       progs.progs.map((p) => {
         //foundry stores plain JSON in settings, and therefore
         const lvls = p.levels.map((l) => {
-          const [granted, options, prereq] = [
-            l.features.granted,
-            l.features.options,
-            l.features.prerequisites,
-          ];
-          const features = new LevelFeatures(granted, options, prereq);
+          const featureSets = l.features.featureSets;
+          const features = new LevelFeatures(featureSets);
           return new ClassLevel(l.id, l.level, features);
         });
         return new ClassProgression(p.cls, lvls).derefProgression(

@@ -15,35 +15,44 @@
     <div class="tab" data-tab="{{prog.cls.item._id}}" data-group="primary-tabs">
       {{#each prog.levels as | level |}}
       <h2 class="level-number">Level {{level.level}}</h2>
-      <div
-        class="features granted drop-box"
-        data-class-id="{{prog.cls.item._id}}"
-        data-level-id="{{level.id}}"
-      >
-        <h3 class="features-header">Granted</h3>
-        {{> "modules/charactermancer/templates/features.html"
-        classId=prog.cls.id levelId=level.id
-        features=level.features.granted.items}}
-      </div>
-      <div
-        class="features options drop-box"
-        data-class-id="{{prog.cls.item._id}}"
-        data-level-id="{{level.id}}"
-      >
-        <h3 class="features-header">Options</h3>
-        {{> "modules/charactermancer/templates/features.html"
-        classId=prog.cls.id levelId=level.id
-        features=level.features.options.items}}
-      </div>
-      <div
-        class="features prerequisites drop-box"
-        data-class-id="{{prog.cls.item._id}}"
-        data-level-id="{{level.id}}"
-      >
-        <h3 class="features-header">Prerequisites</h3>
-        {{> "modules/charactermancer/templates/features.html"
-        classId=prog.cls.id levelId=level.id
-        features=level.features.prerequisites.items}}
+      <div class="feature-sets">
+        {{#each level.features.featureSets as | featureSet |}}
+        <div class="feature-set">
+          <div
+            class="features granted drop-box"
+            data-class-id="{{prog.cls.item._id}}"
+            data-level-id="{{level.id}}"
+            data-feature-set-id="{{@key}}"
+          >
+            <h3 class="features-header">Granted</h3>
+            {{> "modules/charactermancer/templates/features.html"
+            classId=prog.cls.id levelId=level.id featureSetId=@key
+            features=featureSet.granted}}
+          </div>
+          <div
+            class="features options drop-box"
+            data-class-id="{{prog.cls.item._id}}"
+            data-level-id="{{level.id}}"
+            data-feature-set-id="{{@key}}"
+          >
+            <h3 class="features-header">Options</h3>
+            {{> "modules/charactermancer/templates/features.html"
+            classId=prog.cls.id levelId=level.id featureSetId=@key
+            features=featureSet.options}}
+          </div>
+          <div
+            class="features prerequisites drop-box"
+            data-class-id="{{prog.cls.item._id}}"
+            data-level-id="{{level.id}}"
+            data-feature-set-id="{{@key}}"
+          >
+            <h3 class="features-header">Prerequisites</h3>
+            {{> "modules/charactermancer/templates/features.html"
+            classId=prog.cls.id levelId=level.id featureSetId=@key
+            features=featureSet.prerequisites}}
+          </div>
+        </div>
+        {{/each}}
       </div>
       {{/each}}
       <button class="new-lvl" data-class-id="{{this.cls.item._id}}">
