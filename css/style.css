@@ -123,3 +123,8 @@
 .charactermancer-form .feature-set:last-child {
   border: none;
 }
+
+/* hide add block button everywhere but the last block */
+.feature-set:not(:last-child) .add-feature-set {
+  display: none;
+}
