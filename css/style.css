@@ -54,6 +54,17 @@
   background-color: rgb(0, 0, 0, 0.05);
   margin: 0;
   padding: 5px;
+  display: flex;
+}
+
+.charactermancer-form .features-header h3 {
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.charactermancer-form .features-header .add-prerequisites-block {
+  margin-right: auto;
 }
 
 .charactermancer-form .feature {
@@ -96,4 +107,24 @@
   color: #51504b;
   background-color: rgb(0, 0, 0, 0.03);
   border: 1px dashed #7a7971;
+}
+
+.charactermancer-form .feature-sets {
+  display: flex;
+}
+
+.charactermancer-form .feature-set {
+  flex: 1;
+  margin: 5px 0px 5px 5px;
+  padding-right: 5px;
+  border-right: 1px solid rgb(0, 0, 0, 0.3);
+}
+
+.charactermancer-form .feature-set:last-child {
+  border: none;
+}
+
+/* hide add block button everywhere but the last block */
+.feature-set:not(:last-child) .add-feature-set {
+  display: none;
 }

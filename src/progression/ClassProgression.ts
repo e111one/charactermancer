@@ -131,6 +131,18 @@ export class ClassProgression<R extends ItemReference> {
     return this.withLevels([...this.levels, lvl]);
   }
 
+  addFeatureSet(levelId: string): ClassProgression<R> {
+    return this.withLevels(
+      this.levels.map((lvl) => {
+        if (lvl.id === levelId) {
+          return lvl.addFeatureSet();
+        } else {
+          return lvl;
+        }
+      })
+    );
+  }
+
   private async derefClass(
     compendiumRepository: CompendiumRepository
   ): Promise<ClassProgression<ItemRef>> {
@@ -171,6 +183,9 @@ export class ClassProgression<R extends ItemReference> {
 }
 
 export class ClassLevel<R extends ItemReference> {
+  addFeatureSet(): ClassLevel<R> {
+    return new ClassLevel(this.id, this.level, this.features.addFeatureSet());
+  }
   constructor(
     readonly id: string,
     readonly level: number,
@@ -237,6 +252,13 @@ export class LevelFeatures<R extends ItemReference> {
       [randomString()]: emptyFeatureSet(),
     }
   ) {}
+
+  addFeatureSet(): LevelFeatures<R> {
+    return new LevelFeatures({
+      ...this.featureSets,
+      [randomString()]: emptyFeatureSet(),
+    });
+  }
 
   /**
    * Return copy of this object with all the internal items dereferenced
