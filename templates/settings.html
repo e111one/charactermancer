@@ -15,6 +15,13 @@
     <div class="tab" data-tab="{{prog.cls.item._id}}" data-group="primary-tabs">
       {{#each prog.levels as | level |}}
       <h2 class="level-number">Level {{level.level}}</h2>
+      <a
+        class="level-delete"
+        data-class-id="{{prog.cls.item._id}}"
+        data-feature-set-id="{{@key}}"
+        data-level-id="{{level.id}}"
+        ><i class="fas fa-trash"></i
+      ></a>
       <div class="feature-sets">
         {{#each level.features.featureSets as | featureSet |}}
         <div class="feature-set">

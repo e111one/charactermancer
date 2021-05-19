@@ -131,6 +131,10 @@ export class ClassProgression<R extends ItemReference> {
     return this.withLevels([...this.levels, lvl]);
   }
 
+  public removeLevel(levelId: string): ClassProgression<R> {
+    return this.withLevels(this.levels.filter((lvl) => lvl.id !== levelId));
+  }
+
   addFeatureSet(levelId: string): ClassProgression<R> {
     return this.withLevels(
       this.levels.map((lvl) => {

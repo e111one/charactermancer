@@ -34,6 +34,11 @@ export interface ProgressionRepository {
    */
   addLevelOf(classId: string): Promise<ClassProgression<IdRef>[]>;
 
+  removeLevelOf(
+    classId: string,
+    levelId: string
+  ): Promise<ClassProgression<IdRef>[]>;
+
   /**
    * Add new feature to the class.level.featureType
    * @param classId id of the class to add the feature to
@@ -115,6 +120,22 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     );
   }
 
+  async removeLevelOf(
+    classId: string,
+    levelId: string
+  ): Promise<ClassProgression<IdRef>[]> {
+    const progs = await this.readProgression();
+    return this.writeProgression(
+      progs.map((prog) => {
+        if (prog.class.id === classId) {
+          return prog.removeLevel(levelId);
+        } else {
+          return prog;
+        }
+      })
+    );
+  }
+
   async addFeatureFor(
     classId: string,
     levelId: string,
@@ -166,6 +187,11 @@ export class FoundryProgressionRepository implements ProgressionRepository {
   async addClass(classItem: Item): Promise<ClassProgression<IdRef>[]> {
     const progs = await this.readProgression();
     const prog = progs.find((p) => p.containsClass(classItem.data._id));
+    //@TODO: remClass
+    if (progs.length > 3) {
+      console.log("hey ho addClass => 0");
+      return this.writeProgression([]);
+    }
     if (prog)
       return Promise.resolve().then((_void) =>
         progs.map((p) => p.refProgression())
