@@ -68,6 +68,11 @@ export interface ProgressionRepository {
     featureSetId: string,
     featureId: string
   ): Promise<ItemRef | null>;
+
+  addFeatureSet(
+    classId: string,
+    levelId: string
+  ): Promise<ClassProgression<IdRef>[]>;
 }
 
 export class FoundryProgressionRepository implements ProgressionRepository {
@@ -79,6 +84,22 @@ export class FoundryProgressionRepository implements ProgressionRepository {
     protected config: Config
   ) {
     this.init();
+  }
+
+  async addFeatureSet(
+    classId: string,
+    levelId: string
+  ): Promise<ClassProgression<IdRef>[]> {
+    const progs = await this.readProgression();
+    return this.writeProgression(
+      progs.map((prog) => {
+        if (prog.class.id === classId) {
+          return prog.addFeatureSet(levelId);
+        } else {
+          return prog;
+        }
+      })
+    );
   }
 
   async addLevelOf(classId: string): Promise<ClassProgression<IdRef>[]> {

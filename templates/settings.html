@@ -19,12 +19,34 @@
         {{#each level.features.featureSets as | featureSet |}}
         <div class="feature-set">
           <div
+            class="features prerequisites drop-box"
+            data-class-id="{{prog.cls.item._id}}"
+            data-level-id="{{level.id}}"
+            data-feature-set-id="{{@key}}"
+          >
+            <div class="features-header">
+              <h3>Prerequisites</h3>
+              <a
+                class="add-feature-set"
+                data-class-id="{{prog.cls.item._id}}"
+                data-level-id="{{level.id}}"
+              >
+                <i class="fas fa-plus"></i> Add block
+              </a>
+            </div>
+            {{> "modules/charactermancer/templates/features.html"
+            classId=prog.cls.id levelId=level.id featureSetId=@key
+            features=featureSet.prerequisites}}
+          </div>
+          <div
             class="features granted drop-box"
             data-class-id="{{prog.cls.item._id}}"
             data-level-id="{{level.id}}"
             data-feature-set-id="{{@key}}"
           >
-            <h3 class="features-header">Granted</h3>
+            <div class="features-header">
+              <h3>Granted</h3>
+            </div>
             {{> "modules/charactermancer/templates/features.html"
             classId=prog.cls.id levelId=level.id featureSetId=@key
             features=featureSet.granted}}
@@ -35,21 +57,12 @@
             data-level-id="{{level.id}}"
             data-feature-set-id="{{@key}}"
           >
-            <h3 class="features-header">Options</h3>
+            <div class="features-header">
+              <h3>Options</h3>
+            </div>
             {{> "modules/charactermancer/templates/features.html"
             classId=prog.cls.id levelId=level.id featureSetId=@key
             features=featureSet.options}}
-          </div>
-          <div
-            class="features prerequisites drop-box"
-            data-class-id="{{prog.cls.item._id}}"
-            data-level-id="{{level.id}}"
-            data-feature-set-id="{{@key}}"
-          >
-            <h3 class="features-header">Prerequisites</h3>
-            {{> "modules/charactermancer/templates/features.html"
-            classId=prog.cls.id levelId=level.id featureSetId=@key
-            features=featureSet.prerequisites}}
           </div>
         </div>
         {{/each}}

@@ -67,7 +67,8 @@ export class ProgressionForm {
         this.bindAddLevelButtons(html);
         this.bindItemSheetClicks(html);
         this.bindDragHighlight(html);
-        this.removeFeatureItemClicks(html);
+        this.bindRemoveFeatureItemClicks(html);
+        this.bindNewFeatureSetClicks(html);
       }
 
       private bindAddLevelButtons(html: JQuery): void {
@@ -97,7 +98,20 @@ export class ProgressionForm {
         });
       }
 
-      private removeFeatureItemClicks(html: JQuery): void {
+      private bindNewFeatureSetClicks(html: JQuery): void {
+        html.find(".add-feature-set").map((_, element) => {
+          element.addEventListener("click", (_) => {
+            const classId = element.getAttribute("data-class-id");
+            const levelId = element.getAttribute("data-level-id");
+
+            void progressionRepository
+              .addFeatureSet(classId, levelId)
+              .then((_) => this.render());
+          });
+        });
+      }
+
+      private bindRemoveFeatureItemClicks(html: JQuery): void {
         html.find(".feature-delete").map((_, element) => {
           element.addEventListener("click", (event) => {
             event.preventDefault();
